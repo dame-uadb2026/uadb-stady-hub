@@ -232,7 +232,7 @@ def compter_visite():
     db = get_db()
     db.execute("""
         INSERT INTO visites_quotidiennes (jour, total) VALUES (?, 1)
-        ON CONFLICT(jour) DO UPDATE SET total = total + 1
+        ON CONFLICT(jour) DO UPDATE SET total = visites_quotidiennes.total+1
     """, (jour,))
     db.commit()
 
