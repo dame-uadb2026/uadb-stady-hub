@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: uadb-study-hub
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: UADB_SECRET_KEY
+        generateValue: true
+      # DATABASE_URL est à ajouter manuellement dans l'onglet Environment
+      # de Render (pas ici, car c'est une information sensible à ne jamais
+      # mettre dans le code partagé sur GitHub). C'est l'adresse de connexion
+      # Supabase — utilise obligatoirement le lien "Session pooler"
+      # (port 5432), pas le lien "Direct connection" (ne marche pas
+      # depuis Render, problème connu d'IPv6).
