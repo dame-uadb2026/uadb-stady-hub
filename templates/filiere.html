@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titre %}{{ filiere.nom }} — UADB Study Hub{% endblock %}
+
+{% block contenu %}
+<section class="conteneur section">
+  <nav class="fil-ariane">
+    <a href="{{ url_for('accueil') }}">Accueil</a> <span>/</span>
+    <a href="{{ url_for('voir_niveau', slug=filiere.niveau_slug) }}">{{ filiere.niveau_nom }}</a> <span>/</span>
+    <span>{{ filiere.nom }}</span>
+  </nav>
+
+  <h1 class="titre-page">{{ filiere.niveau_nom }} · {{ filiere.nom }}</h1>
+
+  {% if matieres %}
+    {% for semestre, liste in matieres_par_semestre.items() %}
+      <h2 class="titre-semestre">
+        {% if semestre and semestre > 0 %}Semestre {{ semestre }}{% else %}Autres matières{% endif %}
+      </h2>
+      <div class="grille-matieres">
+        {% for m in liste %}
+          <a href="{{ url_for('voir_matiere', slug=m.slug) }}" class="carte-matiere">
+            <span class="carte-matiere__nom">{{ m.nom }}</span>
+            <span class="carte-matiere__statut">
+              {% if m.total_documents > 0 %}
+                {{ m.total_documents }} document{{ 's' if m.total_documents > 1 else '' }}
+              {% else %}
+                Aucun document pour l'instant
+              {% endif %}
+            </span>
+            {% if m.derniere_maj %}
+              <span class="carte-matiere__maj">Mis à jour le {{ m.derniere_maj }}</span>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="etat-vide">Les matières de {{ filiere.nom }} seront ajoutées dès que le programme sera confirmé.</p>
+  {% endif %}
+</section>
+{% endblock %}

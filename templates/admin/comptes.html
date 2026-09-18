@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block titre %}Comptes admin — UADB Study Hub{% endblock %}
+
+{% block contenu %}
+<section class="conteneur section section--etroite">
+  <nav class="fil-ariane">
+    <a href="{{ url_for('admin_dashboard') }}">Espace admin</a> <span>/</span>
+    <span>Comptes admin</span>
+  </nav>
+
+  <h1 class="titre-page">Comptes admin</h1>
+  <p class="section__legende">
+    Chaque compte a les mêmes droits : ajout/modification/suppression de matières et documents, partout.
+  </p>
+
+  <table class="tableau-admin" style="margin-bottom: 30px;">
+    <thead>
+      <tr><th>Identifiant</th><th>Filière</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for c in comptes %}
+        <tr>
+          <td>{{ c.username }}</td>
+          <td>{{ c.filiere_nom or 'Toutes (admin général)' }}</td>
+          <td class="tableau-admin__actions">
+            <form method="post" action="{{ url_for('admin_compte_supprimer', admin_id=c.id) }}"
+                  onsubmit="return confirm('Supprimer le compte « {{ c.username }} » ?');" class="form-inline">
+              <button type="submit" class="lien-action lien-action--danger">Supprimer</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2 class="titre-semestre">Ajouter un compte</h2>
+  <form method="post" action="{{ url_for('admin_compte_ajouter') }}" class="formulaire carte-formulaire">
+    <label>
+      Identifiant
+      <input type="text" name="username" required placeholder="Ex. mpi-l2">
+    </label>
+    <label>
+      Mot de passe
+      <input type="password" name="password" required minlength="6" placeholder="Au moins 6 caractères">
+    </label>
+    <label>
+      Filière gérée
+      <select name="filiere_id">
+        <option value="">— Toutes (admin général) —</option>
+        {% for f in filieres %}
+          <option value="{{ f.id }}">{{ f.niveau_nom }} · {{ f.nom }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit" class="bouton">Créer le compte</button>
+  </form>
+</section>
+{% endblock %}

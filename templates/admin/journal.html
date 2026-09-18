@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titre %}Journal d'activité — UADB Study Hub{% endblock %}
+
+{% block contenu %}
+<section class="conteneur section">
+  <nav class="fil-ariane">
+    <a href="{{ url_for('admin_dashboard') }}">Espace admin</a> <span>/</span>
+    <span>Journal d'activité</span>
+  </nav>
+
+  <div class="section__entete">
+    <h1 class="titre-page" style="margin-bottom:4px;">Journal d'activité</h1>
+    <p class="section__legende">
+      Historique des ajouts, modifications et suppressions de documents par chaque
+      gestionnaire (200 dernières actions). Visible uniquement par toi.
+    </p>
+  </div>
+
+  {% if entrees %}
+    <div class="tableau-scroll">
+      <table class="tableau-admin">
+        <thead>
+          <tr>
+            <th>Date et heure</th>
+            <th>Gestionnaire</th>
+            <th>Action</th>
+            <th>Détail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in entrees %}
+            <tr>
+              <td>{{ e.date_heure }}</td>
+              <td>{{ e.username }}</td>
+              <td>{{ e.action }}</td>
+              <td>{{ e.details }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="etat-vide">Aucune activité enregistrée pour le moment.</div>
+  {% endif %}
+</section>
+{% endblock %}

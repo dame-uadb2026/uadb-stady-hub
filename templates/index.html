@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block titre %}UADB Study Hub — Accueil{% endblock %}
+
+{% block contenu %}
+
+<section class="heros">
+  <div class="conteneur heros__inner">
+    <p class="heros__eyebrow">Projet étudiant indépendant — UADB</p>
+    <h1 class="heros__titre">UADB Study Hub</h1>
+    <p class="heros__soustitre">
+      Cours, TD, exercices, corrigés et annales, classés par niveau et par filière.
+      Une initiative d'étudiants pour s'entraider, qui s'enrichit progressivement filière par filière.
+    </p>
+    <form class="recherche-heros" action="{{ url_for('recherche') }}" method="get">
+      <input type="search" name="q" placeholder="Ex. « Algèbre 1 », « TD mécanique »…" autofocus>
+      <button type="submit">Rechercher</button>
+    </form>
+    <div class="heros__stats">
+      <span><strong>{{ stats.total_documents }}</strong> document{{ 's' if stats.total_documents > 1 else '' }}</span>
+      <span class="heros__stats-sep">·</span>
+      <span><strong>{{ stats.total_matieres }}</strong> matière{{ 's' if stats.total_matieres > 1 else '' }}</span>
+      <span class="heros__stats-sep">·</span>
+      <span><strong>{{ stats.total_filieres }}</strong> filière{{ 's' if stats.total_filieres > 1 else '' }}</span>
+    </div>
+  </div>
+</section>
+
+<section class="conteneur section">
+  <div class="section__entete">
+    <h2>Accès rapides</h2>
+    <p class="section__legende">Choisissez votre niveau et votre filière.</p>
+  </div>
+
+  <div class="grille-filieres">
+    {% for f in filieres %}
+      {% set total = compte_par_filiere.get(f.id, 0) %}
+      <a href="{{ url_for('voir_filiere', slug=f.slug) }}" class="carte-filiere {% if total == 0 %}carte-filiere--vide{% endif %}">
+        <span class="carte-filiere__niveau">{{ f.niveau_nom }}</span>
+        <span class="carte-filiere__nom">{{ f.nom }}</span>
+        {% if total > 0 %}
+          <span class="carte-filiere__statut">{{ total }} document{{ 's' if total > 1 else '' }}</span>
+        {% else %}
+          <span class="carte-filiere__statut carte-filiere__statut--vide">Contenu à venir</span>
+        {% endif %}
+      </a>
+    {% endfor %}
+
+    <a href="{{ url_for('voir_niveau', slug='l3') }}" class="carte-filiere carte-filiere--vide">
+      <span class="carte-filiere__niveau">L3</span>
+      <span class="carte-filiere__nom">Toutes filières</span>
+      <span class="carte-filiere__statut carte-filiere__statut--vide">Contenu à venir</span>
+    </a>
+  </div>
+</section>
+
+{% if recents %}
+<section class="conteneur section" id="ajouts-recents">
+  <div class="section__entete">
+    <h2>Ajouts récents</h2>
+    <p class="section__legende">Les derniers documents mis en ligne.</p>
+  </div>
+  <ul class="liste-recents">
+    {% for doc in recents %}
+      <li class="ligne-recent">
+        <span class="ligne-recent__type">{{ doc.type }}</span>
+        <a href="{{ url_for('voir_matiere', slug=doc.matiere_slug) }}" class="ligne-recent__titre">{{ doc.titre }}</a>
+        <span class="ligne-recent__matiere">{{ doc.matiere_nom }} · {{ doc.filiere_nom }}</span>
+        <span class="ligne-recent__date">{{ doc.date_ajout | date_fr }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% endblock %}

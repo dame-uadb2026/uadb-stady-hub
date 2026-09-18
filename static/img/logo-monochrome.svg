@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 220" width="680" height="220">
+  <!-- UADB Study Hub — logo complet (monochrome, 1 seule couleur = #16233F par défaut) -->
+  <g transform="translate(10,10)" fill="#16233F" stroke="#16233F">
+    <polygon points="100,0 189,51 189,153 100,204 11,153 11,51"
+             fill="none" stroke-width="10" stroke-linejoin="round"/>
+
+    <line x1="100" y1="40" x2="74" y2="72"  stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="100" y1="40" x2="126" y2="72" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="74"  y1="72" x2="126" y2="72" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="100" y1="40" x2="100" y2="94" stroke-width="4.5" stroke-linecap="round"/>
+
+    <circle cx="100" cy="40" r="9" stroke="none"/>
+    <circle cx="74"  cy="72" r="7" stroke="none"/>
+    <circle cx="126" cy="72" r="7" stroke="none"/>
+
+    <path d="M100,98 C 80,102 61,106 50,117 C 44,124 42,138 44,151 C 46,160 50,166 54,168
+             C 69,160 86,160 100,167 Z" stroke="none"/>
+    <path d="M100,98 C 120,102 139,106 150,117 C 156,124 158,138 156,151 C 154,160 150,166 146,168
+             C 131,160 114,160 100,167 Z" stroke="none"/>
+  </g>
+
+  <g transform="translate(225,0)" fill="#16233F">
+    <text x="0" y="98" font-family="Fraunces, Georgia, serif" font-size="54" font-weight="700">UADB</text>
+    <text x="0" y="148" font-family="Fraunces, Georgia, serif" font-size="54" font-weight="600">Study Hub</text>
+    <text x="2" y="178" font-family="Inter, Arial, sans-serif" font-size="17" letter-spacing="0.5" fill="#48587A">Ressources de cours entre étudiants</text>
+  </g>
+</svg>

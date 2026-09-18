@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block titre %}Espace administrateur — UADB Study Hub{% endblock %}
+
+{% block contenu %}
+<section class="conteneur section">
+  {% if alertes_sante %}
+    <div class="bandeau-alerte">
+      <p class="bandeau-alerte__titre">⚠️ {{ alertes_sante|length }} point{{ 's' if alertes_sante|length > 1 else '' }} à vérifier avant/après le déploiement</p>
+      <ul>
+        {% for a in alertes_sante %}
+          <li><strong>{{ a.titre }}</strong> — {{ a.detail }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+  <div class="section__entete section__entete--admin">
+    <div>
+      <h1 class="titre-page">Espace administrateur</h1>
+      <p class="section__legende">
+        Connecté en tant que <strong>{{ session.get('admin_username') }}</strong> ·
+        {{ total_documents }} document{{ 's' if total_documents > 1 else '' }} au total
+      </p>
+    </div>
+    <div class="actions-admin">
+      <a href="{{ url_for('admin_matiere_ajouter') }}" class="bouton">+ Ajouter une matière</a>
+      <a href="{{ url_for('admin_document_ajouter') }}" class="bouton bouton--accent">+ Ajouter un document</a>
+      {% if session.get('admin_filiere_id') is none %}
+        <a href="{{ url_for('admin_comptes') }}" class="bouton">Comptes admin</a>
+        <a href="{{ url_for('admin_statistiques') }}" class="bouton">Statistiques</a>
+        <a href="{{ url_for('admin_journal') }}" class="bouton">Journal d'activité</a>
+        <a href="{{ url_for('admin_parametres') }}" class="bouton">Paramètres</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if matieres %}
+    <div class="tableau-scroll">
+      <table class="tableau-admin">
+        <thead>
+          <tr>
+            <th>Niveau</th>
+            <th>Filière</th>
+            <th>Matière</th>
+            <th>Documents</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in matieres %}
+            <tr>
+              <td>{{ m.niveau_nom }}</td>
+              <td>{{ m.filiere_nom }}</td>
+              <td><a href="{{ url_for('voir_matiere', slug=m.slug) }}">{{ m.nom }}</a></td>
+              <td>{{ m.total_documents }}</td>
+              <td class="tableau-admin__actions">
+                <a href="{{ url_for('admin_document_ajouter', matiere_id=m.id) }}" class="lien-action">+ Document</a>
+                <a href="{{ url_for('admin_matiere_modifier', matiere_id=m.id) }}" class="lien-action">Modifier</a>
+                <form method="post" action="{{ url_for('admin_matiere_supprimer', matiere_id=m.id) }}"
+                      onsubmit="return confirm('Supprimer « {{ m.nom }} » et tous ses documents ?');" class="form-inline">
+                  <button type="submit" class="lien-action lien-action--danger">Supprimer</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="etat-vide">Aucune matière pour l'instant. Commencez par en ajouter une.</p>
+  {% endif %}
+</section>
+{% endblock %}

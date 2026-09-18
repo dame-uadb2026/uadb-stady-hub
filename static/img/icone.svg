@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- UADB Study Hub — icône seule (couleur) -->
+  <!-- Cadre hexagonal : symbole de "hub", de réseau, de communauté étudiante -->
+  <polygon points="120,18 209,69 209,171 120,222 31,171 31,69"
+           fill="#FFFFFF" stroke="#16233F" stroke-width="11" stroke-linejoin="round"/>
+
+  <!-- Trois nœuds reliés : le "hub", le réseau de partage entre étudiants -->
+  <line x1="120" y1="58" x2="94" y2="90"  stroke="#16233F" stroke-width="5" stroke-linecap="round"/>
+  <line x1="120" y1="58" x2="146" y2="90" stroke="#16233F" stroke-width="5" stroke-linecap="round"/>
+  <line x1="94"  y1="90" x2="146" y2="90" stroke="#16233F" stroke-width="5" stroke-linecap="round"/>
+  <line x1="120" y1="58" x2="120" y2="112" stroke="#16233F" stroke-width="5" stroke-linecap="round"/>
+
+  <circle cx="120" cy="58" r="10" fill="#E8A33D"/>
+  <circle cx="94"  cy="90" r="8"  fill="#2C7A5B"/>
+  <circle cx="146" cy="90" r="8"  fill="#C1272D"/>
+
+  <!-- Livre ouvert : le savoir, les ressources partagées -->
+  <path d="M120,116 C 98,120 78,124 66,136 C 60,143 58,158 60,172 C 62,182 66,188 70,190
+           C 86,181 104,181 120,188 Z" fill="#2C7A5B"/>
+  <path d="M120,116 C 142,120 162,124 174,136 C 180,143 182,158 180,172 C 178,182 174,188 170,190
+           C 154,181 136,181 120,188 Z" fill="#E8A33D"/>
+  <line x1="120" y1="115" x2="120" y2="189" stroke="#16233F" stroke-width="4.5" stroke-linecap="round"/>
+</svg>

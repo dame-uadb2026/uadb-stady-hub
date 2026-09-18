@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titre %}{{ niveau.nom }} — UADB Study Hub{% endblock %}
+
+{% block contenu %}
+<section class="conteneur section">
+  <nav class="fil-ariane">
+    <a href="{{ url_for('accueil') }}">Accueil</a> <span>/</span> <span>{{ niveau.nom }}</span>
+  </nav>
+
+  <h1 class="titre-page">{{ niveau.nom }}</h1>
+
+  {% if filieres %}
+    <div class="grille-filieres">
+      {% for f in filieres %}
+        <a href="{{ url_for('voir_filiere', slug=f.slug) }}" class="carte-filiere">
+          <span class="carte-filiere__niveau">{{ niveau.nom }}</span>
+          <span class="carte-filiere__nom">{{ f.nom }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="etat-vide">Les filières de {{ niveau.nom }} seront ajoutées dès que leurs programmes seront confirmés.</p>
+  {% endif %}
+</section>
+{% endblock %}

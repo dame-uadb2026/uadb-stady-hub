@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titre %}Paramètres — UADB Study Hub{% endblock %}
+
+{% block contenu %}
+<section class="conteneur section section--etroite">
+  <nav class="fil-ariane">
+    <a href="{{ url_for('admin_dashboard') }}">Espace admin</a> <span>/</span>
+    <span>Paramètres</span>
+  </nav>
+
+  <h1 class="titre-page">Paramètres</h1>
+
+  <div class="carte-formulaire">
+    <h2 class="titre-section-apropos" style="margin-top:0;">Sauvegarde des données</h2>
+    <p style="color:var(--ardoise-doux); line-height:1.6;">
+      Sur l'hébergement gratuit utilisé, il peut arriver que les données (matières,
+      documents, comptes...) soient effacées automatiquement — par exemple lors d'une
+      mise à jour de l'application. Ce bouton télécharge une copie complète de la base
+      de données à garder en lieu sûr (PC, Google Drive...).
+    </p>
+    <p style="color:var(--ardoise-doux); font-size:13px;">
+      Nombre de documents actuellement dans la base : {{ nb_documents }}
+    </p>
+    <a href="{{ url_for('admin_sauvegarde') }}" class="bouton bouton--accent">
+      Télécharger une sauvegarde
+    </a>
+    <p style="color:var(--ardoise-doux); font-size:13px; margin-top:14px;">
+      À faire régulièrement (par exemple une fois par semaine), ou juste avant toute
+      mise à jour du code. En cas de problème, ce fichier permet de tout remettre en place.
+    </p>
+  </div>
+
+  <div class="carte-formulaire" style="margin-top:20px;">
+    <h2 class="titre-section-apropos" style="margin-top:0;">Restaurer une sauvegarde</h2>
+    <p style="color:var(--ardoise-doux); line-height:1.6;">
+      Choisis un fichier de sauvegarde téléchargé plus tôt (.zip).
+      <strong>Attention :</strong> ceci remplace toutes les données actuelles
+      (matières, documents, comptes) par celles du fichier importé. Tu devras
+      te reconnecter après.
+    </p>
+    <form method="post" action="{{ url_for('admin_restaurer') }}" enctype="multipart/form-data"
+          onsubmit="return confirm('Ceci va remplacer toutes les données actuelles par celles du fichier importé. Continuer ?');"
+          class="formulaire" style="margin-top:0;">
+      <label>
+        Fichier de sauvegarde
+        <input type="file" name="fichier_sauvegarde" accept=".zip,.json" required>
+      </label>
+      <button type="submit" class="bouton" style="background:var(--rouge);">
+        Restaurer cette sauvegarde
+      </button>
+    </form>
+  </div>
+</section>
+{% endblock %}

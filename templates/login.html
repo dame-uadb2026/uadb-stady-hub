@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titre %}Connexion administrateur — UADB Study Hub{% endblock %}
+
+{% block contenu %}
+<section class="conteneur section section--etroite">
+  <h1 class="titre-page">Connexion administrateur</h1>
+  <p class="section__legende">Réservé aux personnes autorisées à gérer les ressources de la plateforme.</p>
+
+  <form method="post" class="formulaire carte-formulaire">
+    <label>
+      Identifiant
+      <input type="text" name="username" required autofocus>
+    </label>
+    <label>
+      Mot de passe
+      <input type="password" name="password" required>
+    </label>
+    <button type="submit" class="bouton">Se connecter</button>
+  </form>
+</section>
+{% endblock %}

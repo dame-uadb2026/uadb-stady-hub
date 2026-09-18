@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 220" width="680" height="220">
+  <!-- UADB Study Hub — logo complet (couleur) -->
+  <g transform="translate(10,10)">
+    <polygon points="100,0 189,51 189,153 100,204 11,153 11,51"
+             fill="#FFFFFF" stroke="#16233F" stroke-width="10" stroke-linejoin="round"/>
+
+    <line x1="100" y1="40" x2="74" y2="72"  stroke="#16233F" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="100" y1="40" x2="126" y2="72" stroke="#16233F" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="74"  y1="72" x2="126" y2="72" stroke="#16233F" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="100" y1="40" x2="100" y2="94" stroke="#16233F" stroke-width="4.5" stroke-linecap="round"/>
+
+    <circle cx="100" cy="40" r="9" fill="#E8A33D"/>
+    <circle cx="74"  cy="72" r="7" fill="#2C7A5B"/>
+    <circle cx="126" cy="72" r="7" fill="#C1272D"/>
+
+    <path d="M100,98 C 80,102 61,106 50,117 C 44,124 42,138 44,151 C 46,160 50,166 54,168
+             C 69,160 86,160 100,167 Z" fill="#2C7A5B"/>
+    <path d="M100,98 C 120,102 139,106 150,117 C 156,124 158,138 156,151 C 154,160 150,166 146,168
+             C 131,160 114,160 100,167 Z" fill="#E8A33D"/>
+    <line x1="100" y1="97" x2="100" y2="168" stroke="#16233F" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Bloc texte -->
+  <g transform="translate(225,0)">
+    <text x="0" y="98" font-family="Fraunces, Georgia, serif" font-size="54" font-weight="700" fill="#16233F">UADB</text>
+    <text x="0" y="148" font-family="Fraunces, Georgia, serif" font-size="54" font-weight="600" fill="#2C7A5B">Study Hub</text>
+    <text x="2" y="178" font-family="Inter, Arial, sans-serif" font-size="17" letter-spacing="0.5" fill="#48587A">Ressources de cours entre étudiants</text>
+    <!-- Liseré tricolore discret, signature visuelle du projet -->
+    <rect x="2" y="188" width="40" height="4" fill="#2C7A5B"/>
+    <rect x="44" y="188" width="40" height="4" fill="#E8A33D"/>
+    <rect x="86" y="188" width="40" height="4" fill="#C1272D"/>
+  </g>
+</svg>

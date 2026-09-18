@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block titre %}Recherche — UADB Study Hub{% endblock %}
+
+{% block contenu %}
+<section class="conteneur section">
+  <nav class="fil-ariane">
+    <a href="{{ url_for('accueil') }}">Accueil</a> <span>/</span> <span>Recherche</span>
+  </nav>
+
+  <h1 class="titre-page">
+    {% if q %}Résultats pour « {{ q }} »{% else %}Rechercher une ressource{% endif %}
+  </h1>
+
+  {% if q and not resultats_matieres and not resultats_documents %}
+    <p class="etat-vide">Aucun résultat pour « {{ q }}». Essayez un autre mot-clé, par exemple le nom d'une matière.</p>
+  {% endif %}
+
+  {% if resultats_matieres %}
+    <div class="bloc-type">
+      <h2 class="bloc-type__titre">Matières</h2>
+      <div class="grille-matieres">
+        {% for m in resultats_matieres %}
+          <a href="{{ url_for('voir_matiere', slug=m.slug) }}" class="carte-matiere">
+            <span class="carte-matiere__nom">{{ m.nom }}</span>
+            <span class="carte-matiere__statut">{{ m.niveau_nom }} · {{ m.filiere_nom }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if resultats_documents %}
+    <div class="bloc-type">
+      <h2 class="bloc-type__titre">Documents</h2>
+      <ul class="liste-documents">
+        {% for doc in resultats_documents %}
+          <li class="carte-document">
+            <div class="carte-document__info">
+              <span class="carte-document__titre">{{ doc.titre }}</span>
+              <span class="carte-document__date">{{ doc.type }} · {{ doc.matiere_nom }}</span>
+            </div>
+            <a class="bouton bouton--petit" href="{{ doc.lien_drive if doc.lien_drive else url_for('telecharger', nom_fichier=doc.nom_fichier) }}" target="_blank" rel="noopener">
+              Consulter le PDF
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

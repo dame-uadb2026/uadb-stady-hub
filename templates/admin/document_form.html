@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block titre %}{{ 'Modifier' if document else 'Ajouter' }} un document — UADB Study Hub{% endblock %}
+
+{% block contenu %}
+<section class="conteneur section section--etroite">
+  <nav class="fil-ariane">
+    <a href="{{ url_for('admin_dashboard') }}">Espace admin</a> <span>/</span>
+    <span>{{ 'Modifier' if document else 'Ajouter' }} un document</span>
+  </nav>
+
+  <h1 class="titre-page">{{ 'Modifier le document' if document else 'Ajouter un document' }}</h1>
+
+  <form method="post" class="formulaire carte-formulaire">
+    <label>
+      Titre du document
+      <input type="text" name="titre" required value="{{ document.titre if document else '' }}" placeholder="Ex. Chapitre 1 — Suites numériques">
+    </label>
+
+    <label>
+      Type de document
+      <select name="type" required>
+        <option value="">— Choisir un type —</option>
+        {% for t in types_documents %}
+          <option value="{{ t }}" {% if document and document.type == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      Matière
+      <select name="matiere_id" required>
+        <option value="">— Choisir une matière —</option>
+        {% for m in matieres %}
+          <option value="{{ m.id }}"
+            {% if document and document.matiere_id == m.id %}selected
+            {% elif matiere_preselectionnee and matiere_preselectionnee == m.id %}selected{% endif %}>
+            {{ m.niveau_nom }} · {{ m.filiere_nom }} · {{ m.nom }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      Lien Google Drive du PDF
+      <input type="url" name="lien_drive" required
+             value="{{ document.lien_drive if document else '' }}"
+             placeholder="https://drive.google.com/file/d/...">
+      <span class="label-aide">
+        1. Mets le PDF sur Google Drive. 2. Clic droit → Partager → "Tous les utilisateurs disposant du lien". 3. Colle le lien ici.
+      </span>
+      {% if document and document.lien_drive %}
+        <a href="{{ document.lien_drive }}" target="_blank" rel="noopener" class="lien-action">
+          Ouvrir ce document dans Drive
+        </a>
+      {% else %}
+        <a href="https://drive.google.com/drive/my-drive" target="_blank" rel="noopener" class="lien-action">
+          Ouvrir Google Drive pour récupérer le lien
+        </a>
+      {% endif %}
+    </label>
+
+    <button type="submit" class="bouton">{{ 'Enregistrer les modifications' if document else 'Ajouter le document' }}</button>
+  </form>
+
+  {% if document %}
+    <form method="post" action="{{ url_for('admin_document_supprimer', document_id=document.id) }}"
+          onsubmit="return confirm('Supprimer définitivement ce document ?');" class="form-suppression">
+      <button type="submit" class="lien-action lien-action--danger">Supprimer ce document</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

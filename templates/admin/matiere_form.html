@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titre %}{{ 'Modifier' if matiere else 'Ajouter' }} une matière — UADB Study Hub{% endblock %}
+
+{% block contenu %}
+<section class="conteneur section section--etroite">
+  <nav class="fil-ariane">
+    <a href="{{ url_for('admin_dashboard') }}">Espace admin</a> <span>/</span>
+    <span>{{ 'Modifier' if matiere else 'Ajouter' }} une matière</span>
+  </nav>
+
+  <h1 class="titre-page">{{ 'Modifier la matière' if matiere else 'Ajouter une matière' }}</h1>
+
+  <form method="post" class="formulaire carte-formulaire">
+    <label>
+      Nom de la matière
+      <input type="text" name="nom" required value="{{ matiere.nom if matiere else '' }}" placeholder="Ex. Analyse 2">
+    </label>
+    <label>
+      Filière
+      <select name="filiere_id" required>
+        <option value="">— Choisir une filière —</option>
+        {% for f in filieres %}
+          <option value="{{ f.id }}" {% if matiere and matiere.filiere_id == f.id %}selected{% endif %}>
+            {{ f.niveau_nom }} · {{ f.nom }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Semestre
+      <select name="semestre">
+        <option value="0" {% if matiere and matiere.semestre == 0 %}selected{% endif %}>— Non précisé —</option>
+        {% for s in range(1, 7) %}
+          <option value="{{ s }}" {% if matiere and matiere.semestre == s %}selected{% endif %}>Semestre {{ s }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit" class="bouton">{{ 'Enregistrer les modifications' if matiere else 'Ajouter la matière' }}</button>
+  </form>
+</section>
+{% endblock %}
