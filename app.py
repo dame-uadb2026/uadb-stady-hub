@@ -806,7 +806,7 @@ def admin_dashboard():
             JOIN filieres ON filieres.id = matieres.filiere_id
             JOIN niveaux ON niveaux.id = filieres.niveau_id
             LEFT JOIN documents ON documents.matiere_id = matieres.id
-            GROUP BY matieres.id, filieres.nom, niveau.nom
+            GROUP BY matieres.id, filieres.nom, niveaux.nom
             ORDER BY niveaux.ordre, filieres.ordre, matieres.ordre
         """).fetchall()
         total_documents = db.execute("SELECT COUNT(*) AS n FROM documents").fetchone()["n"]
