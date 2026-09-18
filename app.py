@@ -232,7 +232,7 @@ def compter_visite():
     db = get_db()
     db.execute("""
         INSERT INTO visites_quotidiennes (jour, total) VALUES (?, 1)
-        ON CONFLICT(jour) DO UPDATE SET total = visites_quotidiennes.total+1
+        ON CONFLICT(jour) DO UPDATE SET total = total + 1
     """, (jour,))
     db.commit()
 
@@ -554,7 +554,7 @@ def accueil():
         SELECT matieres.filiere_id AS filiere_id, COUNT(documents.id) AS total
         FROM matieres
         LEFT JOIN documents ON documents.matiere_id = matieres.id
-        GROUP BY matieres.filieres_id
+        GROUP BY matieres.filiere_id
     """).fetchall()
     compte_par_filiere = {row["filiere_id"]: row["total"] for row in compte_docs}
 
@@ -806,7 +806,7 @@ def admin_dashboard():
             JOIN filieres ON filieres.id = matieres.filiere_id
             JOIN niveaux ON niveaux.id = filieres.niveau_id
             LEFT JOIN documents ON documents.matiere_id = matieres.id
-            GROUP BY matieres.id, filieres.nom, niveaux.nom
+            GROUP BY matieres.id
             ORDER BY niveaux.ordre, filieres.ordre, matieres.ordre
         """).fetchall()
         total_documents = db.execute("SELECT COUNT(*) AS n FROM documents").fetchone()["n"]
@@ -819,7 +819,7 @@ def admin_dashboard():
             JOIN niveaux ON niveaux.id = filieres.niveau_id
             LEFT JOIN documents ON documents.matiere_id = matieres.id
             WHERE matieres.filiere_id = ?
-            GROUP BY matieres.id, filieres.nom, niveaux.nom
+            GROUP BY matieres.id
             ORDER BY niveaux.ordre, filieres.ordre, matieres.ordre
         """, (admin_filiere_id,)).fetchall()
         total_documents = db.execute("""
@@ -1354,8 +1354,11 @@ def date_fr(valeur):
 # __main__ ci-dessous, car sur Render l'appli est démarrée via gunicorn
 # (gunicorn app:app), qui importe ce fichier sans jamais exécuter le bloc
 # __main__. Ces deux fonctions ne font rien si la base existe déjà.
+restaurer_db_depuis_github()
 init_db()
 seed_db()
+
+
 # ---------------------------------------------------------------------------
 # Point d'entrée
 # ---------------------------------------------------------------------------
