@@ -806,7 +806,7 @@ def admin_dashboard():
             JOIN filieres ON filieres.id = matieres.filiere_id
             JOIN niveaux ON niveaux.id = filieres.niveau_id
             LEFT JOIN documents ON documents.matiere_id = matieres.id
-            GROUP BY matieres.id
+            GROUP BY matieres.id, filierers.nom, niveau.nom
             ORDER BY niveaux.ordre, filieres.ordre, matieres.ordre
         """).fetchall()
         total_documents = db.execute("SELECT COUNT(*) AS n FROM documents").fetchone()["n"]
@@ -819,7 +819,7 @@ def admin_dashboard():
             JOIN niveaux ON niveaux.id = filieres.niveau_id
             LEFT JOIN documents ON documents.matiere_id = matieres.id
             WHERE matieres.filiere_id = ?
-            GROUP BY matieres.id
+            GROUP BY matieres.id, filieres.nom, niveaux.nom
             ORDER BY niveaux.ordre, filieres.ordre, matieres.ordre
         """, (admin_filiere_id,)).fetchall()
         total_documents = db.execute("""
