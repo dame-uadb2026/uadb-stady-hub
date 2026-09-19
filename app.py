@@ -554,7 +554,7 @@ def accueil():
         SELECT matieres.filiere_id AS filiere_id, COUNT(documents.id) AS total
         FROM matieres
         LEFT JOIN documents ON documents.matiere_id = matieres.id
-        GROUP BY matieres.filiere_id
+        GROUP BY matieres.filiere_id?
     """).fetchall()
     compte_par_filiere = {row["filiere_id"]: row["total"] for row in compte_docs}
 
@@ -620,7 +620,7 @@ def voir_filiere(slug):
         FROM matieres
         LEFT JOIN documents ON documents.matiere_id = matieres.id
         WHERE matieres.filiere_id = ?
-        GROUP BY matieres.id
+        GROUP BY matieres.id, filieres.nom, niveaux.nom
         ORDER BY matieres.semestre, matieres.ordre
     """, (filiere["id"],)).fetchall()
 
