@@ -137,6 +137,15 @@ def get_db():
 def close_db(exception=None):
     db = g.pop("db", None)
     if db is not None:
+        # Si une erreur s'est produite pendant la requête, on annule la
+        # transaction Postgres en cours avant de fermer. Sans ça, une seule
+        # requête en échec bloquerait toutes les suivantes sur la même
+        # connexion ("current transaction is aborted").
+        if exception is not None:
+            try:
+                db.rollback()
+            except Exception:
+                pass
         db.close()
 
 
@@ -232,7 +241,7 @@ def compter_visite():
     db = get_db()
     db.execute("""
         INSERT INTO visites_quotidiennes (jour, total) VALUES (?, 1)
-        ON CONFLICT(jour) DO UPDATE SET total = visites_quotidiennes. total + 1
+        ON CONFLICT(jour) DO UPDATE SET total = visites_quotidiennes.total + 1
     """, (jour,))
     db.commit()
 
@@ -554,7 +563,7 @@ def accueil():
         SELECT matieres.filiere_id AS filiere_id, COUNT(documents.id) AS total
         FROM matieres
         LEFT JOIN documents ON documents.matiere_id = matieres.id
-        GROUP BY matieres.filiere_id?
+        GROUP BY matieres.filiere_id
     """).fetchall()
     compte_par_filiere = {row["filiere_id"]: row["total"] for row in compte_docs}
 
@@ -620,7 +629,7 @@ def voir_filiere(slug):
         FROM matieres
         LEFT JOIN documents ON documents.matiere_id = matieres.id
         WHERE matieres.filiere_id = ?
-        GROUP BY matieres.id, filieres.nom, niveaux.nom
+        GROUP BY matieres.id
         ORDER BY matieres.semestre, matieres.ordre
     """, (filiere["id"],)).fetchall()
 
@@ -774,6 +783,7 @@ def verifier_sante_deploiement():
             ),
         })
 
+    db = None
     try:
         db = get_db()
         admin = db.execute(
@@ -788,7 +798,11 @@ def verifier_sante_deploiement():
                 ),
             })
     except (psycopg2.OperationalError, psycopg2.errors.UndefinedTable):
-        db.rollback()
+        if db is not None:
+            try:
+                db.rollback()
+            except Exception:
+                pass
 
     return alertes
 
@@ -806,7 +820,7 @@ def admin_dashboard():
             JOIN filieres ON filieres.id = matieres.filiere_id
             JOIN niveaux ON niveaux.id = filieres.niveau_id
             LEFT JOIN documents ON documents.matiere_id = matieres.id
-            GROUP BY matieres.id
+            GROUP BY matieres.id, filieres.id, niveaux.id
             ORDER BY niveaux.ordre, filieres.ordre, matieres.ordre
         """).fetchall()
         total_documents = db.execute("SELECT COUNT(*) AS n FROM documents").fetchone()["n"]
@@ -819,7 +833,7 @@ def admin_dashboard():
             JOIN niveaux ON niveaux.id = filieres.niveau_id
             LEFT JOIN documents ON documents.matiere_id = matieres.id
             WHERE matieres.filiere_id = ?
-            GROUP BY matieres.id
+            GROUP BY matieres.id, filieres.id, niveaux.id
             ORDER BY niveaux.ordre, filieres.ordre, matieres.ordre
         """, (admin_filiere_id,)).fetchall()
         total_documents = db.execute("""
@@ -843,17 +857,17 @@ def admin_statistiques():
 
     total_semaine = db.execute("""
         SELECT COALESCE(SUM(total), 0) AS n FROM visites_quotidiennes
-        WHERE jour >= date('now', '-6 days')
+        WHERE jour >= to_char(CURRENT_DATE - INTERVAL '6 days', 'YYYY-MM-DD')
     """).fetchone()["n"]
 
     total_mois = db.execute("""
         SELECT COALESCE(SUM(total), 0) AS n FROM visites_quotidiennes
-        WHERE strftime('%Y-%m', jour) = strftime('%Y-%m', 'now')
+        WHERE to_char(jour::date, 'YYYY-MM') = to_char(CURRENT_DATE, 'YYYY-MM')
     """).fetchone()["n"]
 
     total_annee = db.execute("""
         SELECT COALESCE(SUM(total), 0) AS n FROM visites_quotidiennes
-        WHERE strftime('%Y', jour) = strftime('%Y', 'now')
+        WHERE to_char(jour::date, 'YYYY') = to_char(CURRENT_DATE, 'YYYY')
     """).fetchone()["n"]
 
     total_general = db.execute(
