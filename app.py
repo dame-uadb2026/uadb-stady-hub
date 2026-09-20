@@ -152,24 +152,32 @@ def close_db(exception=None):
 def journaliser(action, details=""):
     """Enregistre une action d'un admin/gestionnaire dans le journal d'activité,
     visible seulement par le super admin (Paramètres > Journal). Envoie aussi
-    un email à l'admin quand l'action vient d'un coéquipier (pas de lui-même)."""
-    db = get_db()
-    db.execute(
-        "INSERT INTO journal_activite (username, action, details, date_heure) VALUES (?, ?, ?, ?)",
-        (session.get("admin_username", "inconnu"), action, details, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
-    )
-    db.commit()
-    # session.get("admin_filiere_id") vaut None uniquement pour le super admin.
-    # On ne notifie que les actions des coéquipiers (gestionnaires de filière).
-    if session.get("admin_filiere_id") is not None:
-        envoyer_email_notification(
-            sujet=f"[UADB Study Hub] {action}",
-            corps=(
-                f"{session.get('admin_username', 'Un gestionnaire')} vient de faire :\n\n"
-                f"{action} — {details}\n\n"
-                f"({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-            ),
+    un email à l'admin quand l'action vient d'un coéquipier (pas de lui-même).
+    Ne doit jamais faire planter l'action principale (ajout/modif/suppression) :
+    toute erreur ici est ignorée silencieusement."""
+    try:
+        db = get_db()
+        db.execute(
+            "INSERT INTO journal_activite (username, action, details, date_heure) VALUES (?, ?, ?, ?)",
+            (session.get("admin_username", "inconnu"), action, details, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
         )
+        db.commit()
+        # session.get("admin_filiere_id") vaut None uniquement pour le super admin.
+        # On ne notifie que les actions des coéquipiers (gestionnaires de filière).
+        if session.get("admin_filiere_id") is not None:
+            envoyer_email_notification(
+                sujet=f"[UADB Study Hub] {action}",
+                corps=(
+                    f"{session.get('admin_username', 'Un gestionnaire')} vient de faire :\n\n"
+                    f"{action} — {details}\n\n"
+                    f"({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                ),
+            )
+    except Exception:
+        try:
+            get_db().rollback()
+        except Exception:
+            pass
 
 
 def envoyer_email_notification(sujet, corps):
@@ -1168,9 +1176,10 @@ def admin_matiere_supprimer(matiere_id):
     # On supprime aussi les fichiers PDF associés du disque
     documents = db.execute("SELECT nom_fichier FROM documents WHERE matiere_id = ?", (matiere_id,)).fetchall()
     for doc in documents:
-        chemin = os.path.join(app.config["UPLOAD_FOLDER"], doc["nom_fichier"])
-        if os.path.exists(chemin):
-            os.remove(chemin)
+        if doc["nom_fichier"]:
+            chemin = os.path.join(app.config["UPLOAD_FOLDER"], doc["nom_fichier"])
+            if os.path.exists(chemin):
+                os.remove(chemin)
     db.execute("DELETE FROM matieres WHERE id = ?", (matiere_id,))
     db.commit()
     flash("Matière supprimée.", "succes")
