@@ -29,6 +29,7 @@
         <a href="{{ url_for('admin_statistiques') }}" class="bouton">Statistiques</a>
         <a href="{{ url_for('admin_journal') }}" class="bouton">Journal d'activité</a>
         <a href="{{ url_for('admin_parametres') }}" class="bouton">Paramètres</a>
+        <a href="{{ url_for('admin_sauvegarde') }}" class="bouton" style="background:var(--or-fonce);">⬇ Sauvegarde rapide</a>
       {% endif %}
     </div>
   </div>
@@ -51,7 +52,7 @@
               <td>{{ m.niveau_nom }}</td>
               <td>{{ m.filiere_nom }}</td>
               <td><a href="{{ url_for('voir_matiere', slug=m.slug) }}">{{ m.nom }}</a></td>
-              <td>{{ m.total_documents }}</td>
+              <td><a href="{{ url_for('admin_matiere_documents', matiere_id=m.id) }}">{{ m.total_documents }}</a></td>
               <td class="tableau-admin__actions">
                 <a href="{{ url_for('admin_document_ajouter', matiere_id=m.id) }}" class="lien-action">+ Document</a>
                 <a href="{{ url_for('admin_matiere_modifier', matiere_id=m.id) }}" class="lien-action">Modifier</a>
