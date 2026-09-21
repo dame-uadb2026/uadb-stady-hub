@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 UADB Study Hub - Application principale
@@ -1118,6 +1119,28 @@ def admin_matiere_ajouter():
     return render_template("admin/matiere_form.html", filieres=filieres, matiere=None)
 
 
+@app.route("/admin/matiere/<int:matiere_id>/documents")
+@admin_required
+def admin_matiere_documents(matiere_id):
+    """Liste les documents d'une matière avec un lien Modifier/Supprimer pour
+    chacun — pour supprimer UN document précis sans toucher à la matière."""
+    db = get_db()
+    matiere = db.execute("""
+        SELECT matieres.*, filieres.nom AS filiere_nom
+        FROM matieres JOIN filieres ON filieres.id = matieres.filiere_id
+        WHERE matieres.id = ?
+    """, (matiere_id,)).fetchone()
+    if matiere is None:
+        abort(404)
+    if not peut_gerer_filiere(matiere["filiere_id"]):
+        flash("Vous n'avez pas accès à cette matière.", "erreur")
+        return redirect(url_for("admin_dashboard"))
+    documents = db.execute("""
+        SELECT * FROM documents WHERE matiere_id = ? ORDER BY date_ajout DESC, id DESC
+    """, (matiere_id,)).fetchall()
+    return render_template("admin/matiere_documents.html", matiere=matiere, documents=documents)
+
+
 @app.route("/admin/matiere/<int:matiere_id>/modifier", methods=["GET", "POST"])
 @admin_required
 def admin_matiere_modifier(matiere_id):
@@ -1167,7 +1190,7 @@ def admin_matiere_modifier(matiere_id):
 @admin_required
 def admin_matiere_supprimer(matiere_id):
     db = get_db()
-    matiere = db.execute("SELECT filiere_id FROM matieres WHERE id = ?", (matiere_id,)).fetchone()
+    matiere = db.execute("SELECT filiere_id, nom FROM matieres WHERE id = ?", (matiere_id,)).fetchone()
     if matiere is None:
         abort(404)
     if not peut_gerer_filiere(matiere["filiere_id"]):
@@ -1180,9 +1203,10 @@ def admin_matiere_supprimer(matiere_id):
             chemin = os.path.join(app.config["UPLOAD_FOLDER"], doc["nom_fichier"])
             if os.path.exists(chemin):
                 os.remove(chemin)
+    nom_matiere = matiere["nom"]
     db.execute("DELETE FROM matieres WHERE id = ?", (matiere_id,))
     db.commit()
-    flash("Matière supprimée.", "succes")
+    flash(f"Matière « {nom_matiere} » supprimée, ainsi que tous ses documents.", "succes")
     return redirect(url_for("admin_dashboard"))
 
 
@@ -1351,7 +1375,7 @@ def admin_document_supprimer(document_id):
         db.execute("DELETE FROM documents WHERE id = ?", (document_id,))
         db.commit()
         journaliser("Suppression document", f"« {document['titre']} » (id {document_id})")
-        flash("Document supprimé.", "succes")
+        flash(f"Document « {document['titre']} » supprimé (la matière n'a pas été touchée).", "succes")
     return redirect(url_for("admin_dashboard"))
 
 
