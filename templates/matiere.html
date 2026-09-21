@@ -1,40 +1,54 @@
 {% extends "base.html" %}
-{% block titre %}{{ matiere.nom }} — UADB Study Hub{% endblock %}
+{% block titre %}Documents — {{ matiere.nom }} — UADB Study Hub{% endblock %}
 
 {% block contenu %}
 <section class="conteneur section">
   <nav class="fil-ariane">
-    <a href="{{ url_for('accueil') }}">Accueil</a> <span>/</span>
-    <a href="{{ url_for('voir_niveau', slug=matiere.niveau_slug) }}">{{ matiere.niveau_nom }}</a> <span>/</span>
-    <a href="{{ url_for('voir_filiere', slug=matiere.filiere_slug) }}">{{ matiere.filiere_nom }}</a> <span>/</span>
+    <a href="{{ url_for('admin_dashboard') }}">Espace admin</a> <span>/</span>
     <span>{{ matiere.nom }}</span>
   </nav>
 
-  <h1 class="titre-page">{{ matiere.nom }}</h1>
+  <div class="section__entete section__entete--admin">
+    <div>
+      <h1 class="titre-page" style="margin-bottom:4px;">{{ matiere.nom }}</h1>
+      <p class="section__legende">{{ matiere.filiere_nom }} · {{ documents|length }} document{{ 's' if documents|length > 1 else '' }}</p>
+    </div>
+    <div class="actions-admin">
+      <a href="{{ url_for('admin_document_ajouter', matiere_id=matiere.id) }}" class="bouton bouton--accent">+ Document</a>
+    </div>
+  </div>
 
-  {% if documents_par_type %}
-    {% for type in types_ordre %}
-      {% if type in documents_par_type %}
-        <div class="bloc-type">
-          <h2 class="bloc-type__titre">{{ type }}</h2>
-          <ul class="liste-documents">
-            {% for doc in documents_par_type[type] %}
-              <li class="carte-document">
-                <div class="carte-document__info">
-                  <span class="carte-document__titre">{{ doc.titre }}</span>
-                  <span class="carte-document__date">Ajouté le {{ doc.date_ajout | date_fr }}</span>
-                </div>
-                <a class="bouton bouton--petit" href="{{ doc.lien_drive if doc.lien_drive else url_for('telecharger', nom_fichier=doc.nom_fichier) }}" target="_blank" rel="noopener">
-                  Consulter le PDF
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-    {% endfor %}
+  {% if documents %}
+    <div class="tableau-scroll">
+      <table class="tableau-admin">
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Type</th>
+            <th>Ajouté le</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for doc in documents %}
+            <tr>
+              <td>{{ doc.titre }}</td>
+              <td>{{ doc.type }}</td>
+              <td>{{ doc.date_ajout|date_fr }}</td>
+              <td class="tableau-admin__actions">
+                <a href="{{ url_for('admin_document_modifier', document_id=doc.id) }}" class="lien-action">Modifier</a>
+                <form method="post" action="{{ url_for('admin_document_supprimer', document_id=doc.id) }}"
+                      onsubmit="return confirm('Supprimer uniquement le document « {{ doc.titre }} » ?');" class="form-inline">
+                  <button type="submit" class="lien-action lien-action--danger">Supprimer</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
-    <p class="etat-vide">Aucun document n'a encore été ajouté pour {{ matiere.nom }}. Revenez bientôt.</p>
+    <p class="etat-vide">Aucun document pour l'instant dans cette matière.</p>
   {% endif %}
 </section>
 {% endblock %}
