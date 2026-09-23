@@ -32,10 +32,21 @@
         <tbody>
           {% for doc in documents %}
             <tr>
-              <td>{{ doc.titre }}</td>
+              <td>
+                {% if doc.lien_drive %}
+                  <a href="{{ doc.lien_drive }}" target="_blank" rel="noopener">
+                    {{ doc.titre }}
+                  </a>
+                {% else %}
+                  {{ doc.titre }}
+                {% endif %}
+              </td>
               <td>{{ doc.type }}</td>
               <td>{{ doc.date_ajout|date_fr }}</td>
               <td class="tableau-admin__actions">
+                {% if doc.lien_drive %}
+                  <a href="{{ doc.lien_drive }}" target="_blank" rel="noopener" class="lien-action">Ouvrir</a>
+                {% endif %}
                 <a href="{{ url_for('admin_document_modifier', document_id=doc.id) }}" class="lien-action">Modifier</a>
                 <form method="post" action="{{ url_for('admin_document_supprimer', document_id=doc.id) }}"
                       onsubmit="return confirm('Supprimer uniquement le document « {{ doc.titre }} » ?');" class="form-inline">
