@@ -653,7 +653,7 @@ def voir_filiere(slug):
 
 
 @app.route("/matiere/<slug>")
-e(slug):
+def voir_matiere(slug):
     db = get_db()
     matiere = db.execute("""
         SELECT matieres.*, filieres.nom AS filiere_nom, filieres.slug AS filiere_slug,
