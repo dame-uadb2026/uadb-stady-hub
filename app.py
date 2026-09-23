@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 """
 UADB Study Hub - Application principale
@@ -153,32 +152,24 @@ def close_db(exception=None):
 def journaliser(action, details=""):
     """Enregistre une action d'un admin/gestionnaire dans le journal d'activité,
     visible seulement par le super admin (Paramètres > Journal). Envoie aussi
-    un email à l'admin quand l'action vient d'un coéquipier (pas de lui-même).
-    Ne doit jamais faire planter l'action principale (ajout/modif/suppression) :
-    toute erreur ici est ignorée silencieusement."""
-    try:
-        db = get_db()
-        db.execute(
-            "INSERT INTO journal_activite (username, action, details, date_heure) VALUES (?, ?, ?, ?)",
-            (session.get("admin_username", "inconnu"), action, details, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    un email à l'admin quand l'action vient d'un coéquipier (pas de lui-même)."""
+    db = get_db()
+    db.execute(
+        "INSERT INTO journal_activite (username, action, details, date_heure) VALUES (?, ?, ?, ?)",
+        (session.get("admin_username", "inconnu"), action, details, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    db.commit()
+    # session.get("admin_filiere_id") vaut None uniquement pour le super admin.
+    # On ne notifie que les actions des coéquipiers (gestionnaires de filière).
+    if session.get("admin_filiere_id") is not None:
+        envoyer_email_notification(
+            sujet=f"[UADB Study Hub] {action}",
+            corps=(
+                f"{session.get('admin_username', 'Un gestionnaire')} vient de faire :\n\n"
+                f"{action} — {details}\n\n"
+                f"({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+            ),
         )
-        db.commit()
-        # session.get("admin_filiere_id") vaut None uniquement pour le super admin.
-        # On ne notifie que les actions des coéquipiers (gestionnaires de filière).
-        if session.get("admin_filiere_id") is not None:
-            envoyer_email_notification(
-                sujet=f"[UADB Study Hub] {action}",
-                corps=(
-                    f"{session.get('admin_username', 'Un gestionnaire')} vient de faire :\n\n"
-                    f"{action} — {details}\n\n"
-                    f"({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                ),
-            )
-    except Exception:
-        try:
-            get_db().rollback()
-        except Exception:
-            pass
 
 
 def envoyer_email_notification(sujet, corps):
@@ -250,7 +241,7 @@ def compter_visite():
     db = get_db()
     db.execute("""
         INSERT INTO visites_quotidiennes (jour, total) VALUES (?, 1)
-        ON CONFLICT(jour) DO UPDATE SET total = visites_quotidiennes.total + 1
+        ON CONFLICT(jour) DO UPDATE SET total = total + 1
     """, (jour,))
     db.commit()
 
@@ -792,7 +783,6 @@ def verifier_sante_deploiement():
             ),
         })
 
-    db = None
     try:
         db = get_db()
         admin = db.execute(
@@ -807,11 +797,7 @@ def verifier_sante_deploiement():
                 ),
             })
     except (psycopg2.OperationalError, psycopg2.errors.UndefinedTable):
-        if db is not None:
-            try:
-                db.rollback()
-            except Exception:
-                pass
+        db.rollback()
 
     return alertes
 
@@ -829,7 +815,7 @@ def admin_dashboard():
             JOIN filieres ON filieres.id = matieres.filiere_id
             JOIN niveaux ON niveaux.id = filieres.niveau_id
             LEFT JOIN documents ON documents.matiere_id = matieres.id
-            GROUP BY matieres.id, filieres.id, niveaux.id
+            GROUP BY matieres.id
             ORDER BY niveaux.ordre, filieres.ordre, matieres.ordre
         """).fetchall()
         total_documents = db.execute("SELECT COUNT(*) AS n FROM documents").fetchone()["n"]
@@ -842,7 +828,7 @@ def admin_dashboard():
             JOIN niveaux ON niveaux.id = filieres.niveau_id
             LEFT JOIN documents ON documents.matiere_id = matieres.id
             WHERE matieres.filiere_id = ?
-            GROUP BY matieres.id, filieres.id, niveaux.id
+            GROUP BY matieres.id
             ORDER BY niveaux.ordre, filieres.ordre, matieres.ordre
         """, (admin_filiere_id,)).fetchall()
         total_documents = db.execute("""
@@ -866,17 +852,17 @@ def admin_statistiques():
 
     total_semaine = db.execute("""
         SELECT COALESCE(SUM(total), 0) AS n FROM visites_quotidiennes
-        WHERE jour >= to_char(CURRENT_DATE - INTERVAL '6 days', 'YYYY-MM-DD')
+        WHERE jour >= date('now', '-6 days')
     """).fetchone()["n"]
 
     total_mois = db.execute("""
         SELECT COALESCE(SUM(total), 0) AS n FROM visites_quotidiennes
-        WHERE to_char(jour::date, 'YYYY-MM') = to_char(CURRENT_DATE, 'YYYY-MM')
+        WHERE strftime('%Y-%m', jour) = strftime('%Y-%m', 'now')
     """).fetchone()["n"]
 
     total_annee = db.execute("""
         SELECT COALESCE(SUM(total), 0) AS n FROM visites_quotidiennes
-        WHERE to_char(jour::date, 'YYYY') = to_char(CURRENT_DATE, 'YYYY')
+        WHERE strftime('%Y', jour) = strftime('%Y', 'now')
     """).fetchone()["n"]
 
     total_general = db.execute(
@@ -1119,28 +1105,6 @@ def admin_matiere_ajouter():
     return render_template("admin/matiere_form.html", filieres=filieres, matiere=None)
 
 
-@app.route("/admin/matiere/<int:matiere_id>/documents")
-@admin_required
-def admin_matiere_documents(matiere_id):
-    """Liste les documents d'une matière avec un lien Modifier/Supprimer pour
-    chacun — pour supprimer UN document précis sans toucher à la matière."""
-    db = get_db()
-    matiere = db.execute("""
-        SELECT matieres.*, filieres.nom AS filiere_nom
-        FROM matieres JOIN filieres ON filieres.id = matieres.filiere_id
-        WHERE matieres.id = ?
-    """, (matiere_id,)).fetchone()
-    if matiere is None:
-        abort(404)
-    if not peut_gerer_filiere(matiere["filiere_id"]):
-        flash("Vous n'avez pas accès à cette matière.", "erreur")
-        return redirect(url_for("admin_dashboard"))
-    documents = db.execute("""
-        SELECT * FROM documents WHERE matiere_id = ? ORDER BY date_ajout DESC, id DESC
-    """, (matiere_id,)).fetchall()
-    return render_template("admin/matiere_documents.html", matiere=matiere, documents=documents)
-
-
 @app.route("/admin/matiere/<int:matiere_id>/modifier", methods=["GET", "POST"])
 @admin_required
 def admin_matiere_modifier(matiere_id):
@@ -1190,7 +1154,7 @@ def admin_matiere_modifier(matiere_id):
 @admin_required
 def admin_matiere_supprimer(matiere_id):
     db = get_db()
-    matiere = db.execute("SELECT filiere_id, nom FROM matieres WHERE id = ?", (matiere_id,)).fetchone()
+    matiere = db.execute("SELECT filiere_id FROM matieres WHERE id = ?", (matiere_id,)).fetchone()
     if matiere is None:
         abort(404)
     if not peut_gerer_filiere(matiere["filiere_id"]):
@@ -1199,14 +1163,12 @@ def admin_matiere_supprimer(matiere_id):
     # On supprime aussi les fichiers PDF associés du disque
     documents = db.execute("SELECT nom_fichier FROM documents WHERE matiere_id = ?", (matiere_id,)).fetchall()
     for doc in documents:
-        if doc["nom_fichier"]:
-            chemin = os.path.join(app.config["UPLOAD_FOLDER"], doc["nom_fichier"])
-            if os.path.exists(chemin):
-                os.remove(chemin)
-    nom_matiere = matiere["nom"]
+        chemin = os.path.join(app.config["UPLOAD_FOLDER"], doc["nom_fichier"])
+        if os.path.exists(chemin):
+            os.remove(chemin)
     db.execute("DELETE FROM matieres WHERE id = ?", (matiere_id,))
     db.commit()
-    flash(f"Matière « {nom_matiere} » supprimée, ainsi que tous ses documents.", "succes")
+    flash("Matière supprimée.", "succes")
     return redirect(url_for("admin_dashboard"))
 
 
@@ -1375,7 +1337,7 @@ def admin_document_supprimer(document_id):
         db.execute("DELETE FROM documents WHERE id = ?", (document_id,))
         db.commit()
         journaliser("Suppression document", f"« {document['titre']} » (id {document_id})")
-        flash(f"Document « {document['titre']} » supprimé (la matière n'a pas été touchée).", "succes")
+        flash("Document supprimé.", "succes")
     return redirect(url_for("admin_dashboard"))
 
 
@@ -1401,6 +1363,7 @@ def date_fr(valeur):
 # __main__ ci-dessous, car sur Render l'appli est démarrée via gunicorn
 # (gunicorn app:app), qui importe ce fichier sans jamais exécuter le bloc
 # __main__. Ces deux fonctions ne font rien si la base existe déjà.
+restaurer_db_depuis_github()
 init_db()
 seed_db()
 
