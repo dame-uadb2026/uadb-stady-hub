@@ -1363,7 +1363,6 @@ def date_fr(valeur):
 # __main__ ci-dessous, car sur Render l'appli est démarrée via gunicorn
 # (gunicorn app:app), qui importe ce fichier sans jamais exécuter le bloc
 # __main__. Ces deux fonctions ne font rien si la base existe déjà.
-restaurer_db_depuis_github()
 init_db()
 seed_db()
 
